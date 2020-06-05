@@ -55,7 +55,7 @@ int main()
 			if (wordsInput[i] == uniqueWords[j])
 			{
 				repetitionWords[j]++;
-				bool flag = true;
+				flag = true;
 			}
 		}
 
