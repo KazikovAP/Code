@@ -1,99 +1,78 @@
 #include <iostream>
 #include <cstring>
-
-#define MAXWORDCOUNT 1000
-#define MAXSYMBOLCOUNT 10000
+#include <fstream>
+#include <vector>
 
 using namespace std;
 
 int main()
 {
-	int currentWordCount = 0;
-	int uniqueWordCount = 0;
+    int words; //колличество слов посчитанных на данный момент
+    vector<string> wordsInput; //массив содержащий отдельные слова
+    int uniqueWord; // количество уникальных слов
+    vector<string> uniqueWords; //массив уникальных слов
+    vector<int> repetitionWords; //в нём собранно количество повторение каждого слова
 
-	char fileInput[MAXSYMBOLCOUNT] = { '\0' };
-	string parsedWordInput[MAXWORDCOUNT] = { { "" }, { "" } };
-	string uniqueWordArray[MAXWORDCOUNT] = { { "" }, { "" } };
+    ifstream fin("C:\\Users\\Алексей\\Папка с лабами\\Пример\\alex\\alex\\input.txt", ifstream::in); // ввод из файла
+    ofstream fout("C:\\Users\\Алексей\\Папка с лабами\\Пример\\alex\\alex\\output.txt", ofstream::out); //вывод в файл
 
-	int repetitionCounterArray[MAXWORDCOUNT] = { 0 };
+    fin.seekg (0, fin.end); //считывается длина файла
+    int length = fin.tellg(); //length длина которая считывается
+    fin.seekg (0, fin.beg);
 
-	FILE* inputFileStream = fopen("C:\\Users\\Алексей\\Папка с лабами\\Пример\\alex\\alex\\input.txt", "r");
+    char* buffer; //buffer это массив или вектор куда будут считываться символы
+    fin.read (buffer, length); //считывается содержимое файла
 
-	//Разбитие файла на слова при помощи разделительного пробела
-	//fgets считывает построчно
-	while (fgets(fileInput, MAXSYMBOLCOUNT, inputFileStream) != NULL)
-	{
-		for (int i = 0; i < MAXSYMBOLCOUNT; i++)
+    for (int i = 0; i < length; i++) //цикл разбития файла на слова
 		{
-			if (fileInput[i] == '\0')
+			if (buffer[i] != ' ' && buffer[i] != '\n') //проверка, если символ не пробел и не перенос на следующую строку, значит это слово
 			{
-				break;
-			}
-			if (fileInput[i] != ' ' && fileInput[i] != '\n')
-			{
-				parsedWordInput[currentWordCount] += fileInput[i];
+				wordsInput[words] += buffer[i];
 			}
 			else
 			{
-				//Если замечен пробел или символ перехода на новую строку, и при этом кандидат на новое слово не пустой, тогда счетчик слов увеличивается
-				//В противном случае в пустой индекс запишется другое слово
-				if (parsedWordInput[currentWordCount] != "")
+
+				if (wordsInput[words] != "")
 				{
-					currentWordCount++;
+					words++; //значит можно записывать в конец строки с индексом ++
 				}
 			}
 		}
-	}
+    fin.close();
 
-	fclose(inputFileStream);
-
-
-	//Определение уникальности слова
-	for (int i = 1; i <= currentWordCount; i++)
+    for (int i = 1; i <= words; i++) //определение уникальности слова (ищет уникальные слова)
 	{
-		int elementExists = 0;
+		bool flag = false; //будет true если в списке обнаружется одинаковое слово
 
-		//Цикл проходит по массиву уникальных слов, сравнивая с выбранным считанным словом. Если находится совпадение, переменная переключатель принимает значение 1.
-		//При этом счетчик совпадений увеличивается на 1.
-		for (int j = 0; j <= currentWordCount; j++)
+		for (int j = 0; j <= words; j++) //ищет совпадение слов
 		{
-			if (parsedWordInput[i] == uniqueWordArray[j])
+			if (wordsInput[i] == uniqueWords[j])
 			{
-				repetitionCounterArray[j]++;
-				elementExists = 1;
+				repetitionWords[j]++;
+				bool flag = true;
 			}
 		}
 
-		//Если переменная переключатель осталась 0, т.е. такого слова не найдено, оно записывается в уникальные, при этом устанавливая количество повторений этого индекса в 1
-		if (!elementExists)
+        if (!flag)
 		{
-			uniqueWordArray[uniqueWordCount] = parsedWordInput[i];
-			repetitionCounterArray[uniqueWordCount] = 1;
+			uniqueWords[uniqueWord] = wordsInput[i];
+			repetitionWords[uniqueWord] = 1;
 
-			uniqueWordCount++;
+			uniqueWord++;
 		}
 	}
 
-	FILE* outputFileStream = fopen("C:\\Users\\Алексей\\Папка с лабами\\Пример\\alex\\alex\\output.txt", "w");
-
-	//Перевод из cstring сначала в правильный выводный формат, потом в массив char для функции fputs.
-	for (int i = 0; i < uniqueWordCount; i++)
+	fout.open("output.txt"); //вывод данных в файл
+	for (int i = 0; i < uniqueWord; i++)
 	{
-		char fileOutput[MAXSYMBOLCOUNT] = { '\0' };
+		//vector<char> outputs; //в него будет собиратся всё что нужно вынести в файл
 
-		uniqueWordArray[i] += " - ";
-		uniqueWordArray[i] += (repetitionCounterArray[i] + '0');
-		uniqueWordArray[i] += '\n';
-		int j = 0;
+		uniqueWords[i] += " - ";
+		uniqueWords[i] += (repetitionWords[i]);
+		uniqueWords[i] += '\n';
 
-		while (uniqueWordArray[i][j] != '\0')
-		{
-			fileOutput[j] = uniqueWordArray[i][j];
-			j++;
-		}
-
-		fputs(fileOutput, outputFileStream);
+		fout << uniqueWords[i];
 	}
-
-	fclose(outputFileStream);
+	fout.close();
+    return 0;
 }
